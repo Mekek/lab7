@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/server/src/commandManager/commands/AddCommand.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/src/commandManager/commands/AddIfMaxCommand.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/src/commandManager/commands/AddIfMinCommand.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/src/commandManager/commands/ClearCommand.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/src/commandManager/commands/Command.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/src/commandManager/commands/CountByPriceCommand.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/src/commandManager/commands/ExecuteScriptCommand.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/src/commandManager/commands/Exit.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/src/commandManager/commands/HelpCommand.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/src/commandManager/commands/InfoCommand.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/src/commandManager/commands/PrintFieldAscendingEvent.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/src/commandManager/commands/RemoveAllByEventCommand.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/src/commandManager/commands/RemoveAtCommand.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/src/commandManager/commands/RemoveByIdCommand.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/src/commandManager/commands/Save.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/src/commandManager/commands/Show.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/src/commandManager/commands/UpdateCommand.java" charset="UTF-8" />
+  </component>
+</project>

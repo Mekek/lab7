@@ -9,6 +9,8 @@ import responses.CommandStatusResponse_;
 
 import java.util.Objects;
 import java.util.Vector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Removes element from collection by id.
@@ -38,8 +40,14 @@ public class RemoveById implements Command {
     @Override
     public void execute(String[] args) {
         CollectionHandler_<Vector<Ticket>, Ticket> collectionHandler = TicketHandler_.getInstance();
+        long countBefore = collectionHandler.getCollection().stream().count();
+        Stream<Ticket> stream = collectionHandler.getCollection().stream();
+        stream = stream.filter(ticket -> !Objects.equals(ticket.getId(), Integer.valueOf(args[1])));
+        long countAfter = stream.count();
+        Vector<Ticket> vector = stream.collect(Collectors.toCollection(Vector::new));
+        collectionHandler.setCollection(vector);
 
-        if (collectionHandler.getCollection().removeIf(ticket -> Objects.equals(ticket.getId(), Integer.valueOf(args[1]))))
+        if (countBefore != countAfter)
             response = CommandStatusResponse_.ofString("Executed.");
         else
             response = CommandStatusResponse_.ofString("Element with that id doesn't exists.");

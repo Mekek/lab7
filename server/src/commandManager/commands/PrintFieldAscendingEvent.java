@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import responses.CommandStatusResponse_;
 
 import java.util.Vector;
+import java.util.stream.Stream;
 
 /**
  * Prints all distance fields in ascending sorting.
@@ -37,15 +38,21 @@ public class PrintFieldAscendingEvent implements Command {
 //        TreeSet<Ticket> sortedTickets = new TreeSet<>(new TicketComparatorByEvent_().reversed());
 
         CollectionHandler_<Vector<Ticket>, Ticket> collectionHandler = TicketHandler_.getInstance();
-        Vector<Ticket> sortedTickets = new Vector<>();
-        sortedTickets.sort(new TicketComparatorByEvent_());
 
-        sortedTickets.addAll(collectionHandler.getCollection());
-
+        Stream<Ticket> stream = collectionHandler.getCollection().stream();
+        stream = stream.sorted(new TicketComparatorByEvent_());
         StringBuilder sb = new StringBuilder();
-        for (Ticket ticket : sortedTickets) {
-            sb.append(ticket.getEvent().getName()).append('\n');
-        }
+        stream.forEach(ticket -> sb.append(ticket.getEvent().getName()).append('\n'));
+
+//        Vector<Ticket> sortedTickets = new Vector<>();
+//        sortedTickets.sort(new TicketComparatorByEvent_());
+//
+//        sortedTickets.addAll(collectionHandler.getCollection());
+//
+//        StringBuilder sb = new StringBuilder();
+//        for (Ticket ticket : sortedTickets) {
+//            sb.append(ticket.getEvent().getName()).append('\n');
+//        }
         response = CommandStatusResponse_.ofString(sb.toString());
 
         if (collectionHandler.getCollection().isEmpty())

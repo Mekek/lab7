@@ -1,5 +1,6 @@
 package main;
 
+import clientLogic.ClientHandler_;
 import commandManager.ServerCommandManager_;
 import commandManager.commands.Save;
 import models.Ticket;
@@ -16,6 +17,7 @@ import requests.BaseRequest_;
 import java.io.*;
 import java.net.SocketTimeoutException;
 
+import responses.CommandStatusResponse_;
 import serverLogic.DatagramServerConnectionFactory_;
 import serverLogic.ServerConnection_;
 
@@ -40,6 +42,7 @@ public class Main {
     public static final String ENV_KEY = "lab6";
 
     public static void main(String[] args) {
+        Runtime.getRuntime().addShutdownHook(new Thread(Main::finish));
         CollectionHandler_<Vector<Ticket>, Ticket> handler = TicketHandler_.getInstance();
         TicketHandler_ loader = TicketHandler_.getInstance();
 //        HistoryCommand.initializeCommandsHistoryQueue();
@@ -62,11 +65,13 @@ public class Main {
         } catch (IllegalArgumentException e) {
             logger.info("Something went wrong! Collection can't be loaded from file due to some troubles: \n");
             logger.info(e.getMessage());
+            finish();
         }
 
         // connection
         logger.info("Connection...");
         ServerConnection_ connection = new DatagramServerConnectionFactory_().initializeServer(PORT);
+//        Runtime.getRuntime().addShutdownHook(new Thread(Main::finish));
         while (true) {
             try {
                 StatusRequest_ rq = connection.listenAndGetData();
@@ -102,5 +107,17 @@ public class Main {
                 logger.fatal(e);
             }
         }
+    }
+
+    public static void finish() {
+        System.out.println("finish");
+        CommandStatusResponse_ response;
+        logger.trace("Invoked exit command. Saving a collection...");
+        logger.info("Someone is disconnected... Saving a collection...");
+        ClientHandler_.getInstance().allowNewCallerBack();
+        logger.info("Allowed new caller back.");
+        Save saveCommand = new Save();
+        saveCommand.execute(new String[0]);
+        response = CommandStatusResponse_.ofString("Prepared for exit!");
     }
 }

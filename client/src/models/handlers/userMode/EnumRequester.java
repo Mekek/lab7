@@ -2,8 +2,11 @@ package models.handlers.userMode;
 
 import exceptions.BuildObjectException;
 import models.validators.InputValidator;
+import models.validators.MinAgeValidator;
+
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 /**
  * A utility class for requesting an enum value from the user.
@@ -36,11 +39,13 @@ public class EnumRequester<T extends Enum<T>> {
 
             String nextLine;
             Integer userAnswer;
+            Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
             while (true) {
                 System.out.print("Enter number from 1 to " + values.length + ": ");
                 nextLine = scanner.nextLine();
 
-                if (inputValidator.validate(nextLine)) {
+                if (inputValidator.validate(nextLine) && pattern.matcher(nextLine).matches()) {
+
                     userAnswer = Integer.valueOf(nextLine);
                     if (userAnswer >= 1 && userAnswer <= i)
                         return values[userAnswer - 1];
@@ -48,7 +53,7 @@ public class EnumRequester<T extends Enum<T>> {
                 } else System.out.println("Input should not be empty!(value is not null)");
             }
         } catch (NumberFormatException e) {
-            System.out.println("Требуется ввести целое число от 1 до " + values.length + "!");
+            System.out.println("Wrong number! Enter number from 1 to " + values.length + "!");
             return null;
         } catch (NoSuchElementException e) {
             throw new BuildObjectException("Во время конструирования объекта произошла ошибка: " + e.getMessage());

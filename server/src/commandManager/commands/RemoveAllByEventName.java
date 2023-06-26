@@ -9,6 +9,8 @@ import responses.CommandStatusResponse_;
 
 import java.util.Objects;
 import java.util.Vector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Removes all elements from the collection that have the same event.
@@ -38,8 +40,14 @@ public class RemoveAllByEventName implements Command {
     @Override
     public void execute(String[] args) {
         CollectionHandler_<Vector<Ticket>, Ticket> collectionHandler = TicketHandler_.getInstance();
+        Stream<Ticket> stream = collectionHandler.getCollection().stream();
+        long countBefore = stream.count();
+        stream = stream.filter(ticket -> Objects.equals(ticket.getEvent().getName(), String.valueOf(args[1])));
+        long countAfter = stream.count();
+        Vector<Ticket> vector = stream.collect(Collectors.toCollection(Vector::new));
+        collectionHandler.setCollection(vector);
 
-        if (collectionHandler.getCollection().removeIf(ticket -> Objects.equals(ticket.getEvent().getName(), String.valueOf(args[1]))))
+        if (countBefore != countAfter)
             response = CommandStatusResponse_.ofString("Executed.");
         else
             response = CommandStatusResponse_.ofString("Element with that event name doesn't exists.");

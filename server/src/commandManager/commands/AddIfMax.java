@@ -1,6 +1,7 @@
 package commandManager.commands;
 
 import models.Ticket;
+import models.comparators.TicketComparator_;
 import models.handlers.CollectionHandler_;
 import models.handlers.TicketIDHandler_;
 import models.handlers.TicketHandler_;
@@ -11,6 +12,8 @@ import responses.CommandStatusResponse_;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Vector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Adds element if it's value lower than min value.
@@ -43,12 +46,17 @@ public class AddIfMax implements Command, ArgumentConsumer<Ticket> {
 
 //        CollectionHandler_<TreeSet<Ticket>, Ticket> collectionHandler = TicketHandler_.getInstance();
         CollectionHandler_<Vector<Ticket>, Ticket> collectionHandler = TicketHandler_.getInstance();
-        if (obj.getPrice() > collectionHandler.getCollection().lastElement().getPrice()) {
+        Stream<Ticket> stream = collectionHandler.getCollection().stream();
+
+        if (obj.getPrice() > stream.sorted(new TicketComparator_()).collect(Collectors.toCollection(Vector :: new)).lastElement().getPrice()) {
             collectionHandler.addElementToCollection(obj);
             response = CommandStatusResponse_.ofString("Element added!");
         } else {
             response = new CommandStatusResponse_("Element not added: it's not bigger than max value.", 3);
         }
+        stream = collectionHandler.getCollection().stream();
+        Vector<Ticket> vector = stream.collect(Collectors.toCollection(Vector::new));
+        collectionHandler.setCollection(vector);
 
         logger.info(response.getResponse());
     }

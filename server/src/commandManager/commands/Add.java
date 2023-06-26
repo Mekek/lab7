@@ -1,6 +1,7 @@
 package commandManager.commands;
 
 import models.Ticket;
+import models.comparators.TicketComparator_;
 import models.handlers.CollectionHandler_;
 import models.handlers.TicketIDHandler_;
 import models.handlers.TicketHandler_;
@@ -10,6 +11,8 @@ import responses.CommandStatusResponse_;
 
 
 import java.util.Vector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Adds new element to collection.
@@ -49,7 +52,9 @@ public class Add implements commandManager.commands.Command, commandManager.comm
         CollectionHandler_<Vector<Ticket>, Ticket> collectionHandler = models.handlers.TicketHandler_.getInstance();
 
         collectionHandler.addElementToCollection(obj);
-
+        Stream<Ticket> stream = collectionHandler.getCollection().stream().sorted(new TicketComparator_());
+        Vector<Ticket> vector = stream.collect(Collectors.toCollection(Vector::new));
+        collectionHandler.setCollection(vector);
         response = CommandStatusResponse_.ofString("Element added!");
         logger.info(response.getResponse());
     }

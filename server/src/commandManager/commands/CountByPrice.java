@@ -9,6 +9,9 @@ import responses.CommandStatusResponse_;
 
 import java.util.Objects;
 import java.util.Vector;
+import java.util.stream.Stream;
+
+import static java.lang.Float.parseFloat;
 
 public class CountByPrice implements Command {
     private static final Logger logger = LogManager.getLogger("io.github.Mekek.lab6.commands.countByPrice");
@@ -36,14 +39,12 @@ public class CountByPrice implements Command {
         CollectionHandler_<Vector<Ticket>, Ticket> collectionHandler = TicketHandler_.getInstance();
 
         StringBuilder sb = new StringBuilder();
-        int counter = 0;
-        for (Ticket ticket : collectionHandler.getCollection()) {
-            if (Objects.equals(ticket.getPrice(), Float.valueOf(args[1]))) {
-                counter ++;
-            }
 
-        }
-        sb.append(counter).append('\n');
+        Stream<Ticket> stream = collectionHandler.getCollection().stream();
+        long count = stream.filter(ticket -> Objects.equals(ticket.getPrice(), Float.valueOf(args[1]))).count();
+
+
+        sb.append(count);
         response = CommandStatusResponse_.ofString(sb.toString());
 
         if (collectionHandler.getCollection().isEmpty())

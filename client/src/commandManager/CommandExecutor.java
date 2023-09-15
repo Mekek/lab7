@@ -1,10 +1,11 @@
 package commandManager;
 
-import commandLogic.CommandDescription_;
-import commandLogic.commandReceiverLogic.ReceiverManager_;
-import commandLogic.commandReceiverLogic.enums.ReceiverType_;
-import commandLogic.commandReceiverLogic.handlers.ArgumentReceiverHandler_;
-import commandLogic.commandReceiverLogic.handlers.NonArgReceiversHandler_;
+import Client.Client;
+import commandLogic.CommandDescription;
+import commandLogic.commandReceiverLogic.ReceiverManager;
+import commandLogic.commandReceiverLogic.enums.ReceiverType;
+import commandLogic.commandReceiverLogic.handlers.ArgumentReceiverHandler;
+import commandLogic.commandReceiverLogic.handlers.NonArgReceiversHandler;
 import commandManager.externalRecievers.ArgumentTicketCommandReceiver;
 import commandManager.externalRecievers.ExecuteScriptReceiver;
 import commandManager.externalRecievers.ExitReceiver;
@@ -30,10 +31,10 @@ import static commandManager.CommandMode.CLI_UserMode;
 public class CommandExecutor {
     private static final Logger logger = LogManager.getLogger("com.github.Mekek.lab6");
 
-    private final ArrayList<CommandDescription_> commands;
+    private final ArrayList<CommandDescription> commands;
     private final Scanner scannerInput;
     private final CommandMode mode;
-    private final ReceiverManager_ manager;
+    private final ReceiverManager manager;
 
     /**
      * Constructor :/
@@ -42,27 +43,27 @@ public class CommandExecutor {
      * @param input    commands stream (File, System.in, e.t.c.)
      * @param mode     variant of command behavior (see CommandMode enum)
      */
-    public CommandExecutor(ArrayList<CommandDescription_> commands, InputStream input, CommandMode mode) throws CommandsNotLoadedException {
+    public CommandExecutor(ArrayList<CommandDescription> commands, InputStream input, CommandMode mode) throws CommandsNotLoadedException {
         if (commands == null) throw new CommandsNotLoadedException();
 
         this.commands = commands;
         this.scannerInput = new Scanner(input);
         this.mode = mode;
-        manager = new ReceiverManager_();
+        manager = new ReceiverManager();
 
-        manager.registerHandler(ReceiverType_.NoArgs, new NonArgReceiversHandler_());
-        manager.registerHandler(ReceiverType_.ArgumentRoute, new ArgumentReceiverHandler_<>(Ticket.class));
+        manager.registerHandler(ReceiverType.NoArgs, new NonArgReceiversHandler());
+        manager.registerHandler(ReceiverType.ArgumentRoute, new ArgumentReceiverHandler<>(Ticket.class));
 
-        manager.registerReceiver(ReceiverType_.NoArgs, new NonArgumentReceiver());
-        manager.registerReceiver(ReceiverType_.NoArgs, new ExecuteScriptReceiver());
-        manager.registerReceiver(ReceiverType_.NoArgs, new ExitReceiver());
+        manager.registerReceiver(ReceiverType.NoArgs, new NonArgumentReceiver());
+        manager.registerReceiver(ReceiverType.NoArgs, new ExecuteScriptReceiver());
+        manager.registerReceiver(ReceiverType.NoArgs, new ExitReceiver());
 
         ModeManager<Ticket> modeManager = null;
         switch (mode) {
             case CLI_UserMode -> modeManager = new TicketCLIManager();
             case NonUserMode -> modeManager = new TicketNonUserManager(scannerInput);
         }
-        manager.registerReceiver(ReceiverType_.ArgumentRoute, new ArgumentTicketCommandReceiver(modeManager));
+        manager.registerReceiver(ReceiverType.ArgumentRoute, new ArgumentTicketCommandReceiver(modeManager));
     }
 
     /**
@@ -74,9 +75,11 @@ public class CommandExecutor {
             if (line.isEmpty()) continue;
             try {
                 try {
+                    Client client = Client.getInstance();
+
                     String[] lineArgs = line.split(" ");
-                    CommandDescription_ description = Optional.ofNullable(commands).orElseThrow(CommandsNotLoadedException::new).stream().filter(x -> x.getName().equals(lineArgs[0])).findAny().orElseThrow(() -> new UnknownCommandException("Указанная команда не была обнаружена"));
-                    description.getReceiver().callReceivers(manager, description, lineArgs);
+                    CommandDescription description = Optional.ofNullable(commands).orElseThrow(CommandsNotLoadedException::new).stream().filter(x -> x.getName().equals(lineArgs[0])).findAny().orElseThrow(() -> new UnknownCommandException("Указанная команда не была обнаружена"));
+                    description.getReceiver().callReceivers(client.getName(), client.getPasswd(), manager, description, lineArgs);
                 } catch (IllegalArgumentException | NullPointerException e) {
                     logger.warn("Выполнение команды пропущено из-за неправильных предоставленных аргументов! (" + e.getMessage() + ")");
                     throw new CommandInterruptedException(e);

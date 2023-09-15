@@ -1,15 +1,17 @@
 package commandManager.commands;
 
+import collectionStorageManager.PostgreSQLManager;
 import models.Ticket;
-import models.comparators.TicketComparator_;
-import models.handlers.CollectionHandler_;
-import models.handlers.TicketIDHandler_;
-import models.handlers.TicketHandler_;
+import models.comparators.TicketComparator;
+import models.handlers.CollectionHandler;
+import models.handlers.TicketHandler;
+import models.handlers.TicketIDHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import responses.CommandStatusResponse_;
+import responses.CommandStatusResponse;
 
 
+import java.util.Vector;
 import java.util.Vector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,14 +24,14 @@ import java.util.stream.Stream;
  */
 public class Add implements commandManager.commands.Command, commandManager.commands.ArgumentConsumer<Ticket> {
     private static final Logger logger = LogManager.getLogger("io.github.Mekek.lab6.commands.add");
-    private CommandStatusResponse_ response;
+    private CommandStatusResponse response;
 
     private Ticket obj;
 
     @Override
     public void setObj(Ticket obj) {
         this.obj = obj;
-        obj.setId(TicketIDHandler_.generateId());
+        obj.setId(TicketIDHandler.generateId());
     }
 
     @Override
@@ -49,18 +51,30 @@ public class Add implements commandManager.commands.Command, commandManager.comm
 
     @Override
     public void execute(String[] args) {
-        CollectionHandler_<Vector<Ticket>, Ticket> collectionHandler = models.handlers.TicketHandler_.getInstance();
+        PostgreSQLManager manager = new PostgreSQLManager();
 
-        collectionHandler.addElementToCollection(obj);
-        Stream<Ticket> stream = collectionHandler.getCollection().stream().sorted(new TicketComparator_());
-        Vector<Ticket> vector = stream.collect(Collectors.toCollection(Vector::new));
-        collectionHandler.setCollection(vector);
-        response = CommandStatusResponse_.ofString("Element added!");
+        // Add the new element to the database and retrieve its generated ID
+        int generatedId = manager.writeObjectToDatabase(obj);
+
+        if (generatedId != -1) {
+            // Set the generated ID for the new element
+            obj.setId(generatedId);
+            CollectionHandler<Vector<Ticket>, Ticket> collectionHandler = TicketHandler.getInstance();
+            collectionHandler.addElementToCollection(obj);
+            Stream<Ticket> stream = collectionHandler.getCollection().stream().sorted(new TicketComparator());
+            Vector<Ticket> vector = stream.collect(Collectors.toCollection(Vector::new));
+            collectionHandler.setCollection(vector);
+
+            response = CommandStatusResponse.ofString("Element added with ID: " + generatedId);
+        } else {
+            response = CommandStatusResponse.ofString("Failed to add element.");
+        }
+
         logger.info(response.getResponse());
     }
 
     @Override
-    public CommandStatusResponse_ getResponse() {
+    public CommandStatusResponse getResponse() {
         return response;
     }
 }

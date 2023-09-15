@@ -1,19 +1,19 @@
 package commandManager;
 
-import commandLogic.CommandDescription_;
+import commandLogic.CommandDescription;
 
 import java.util.ArrayList;
 
 public class CommandDescriptionHolder {
 
     private static CommandDescriptionHolder instance;
-    ArrayList<CommandDescription_> commands;
+    ArrayList<CommandDescription> commands;
 
-    private CommandDescriptionHolder(ArrayList<CommandDescription_> commands) {
+    private CommandDescriptionHolder(ArrayList<CommandDescription> commands) {
         this.commands = commands;
     }
 
-    public static void initialize(ArrayList<CommandDescription_> commands) {
+    public static void initialize(ArrayList<CommandDescription> commands) {
         instance = new CommandDescriptionHolder(commands);
     }
 
@@ -21,7 +21,7 @@ public class CommandDescriptionHolder {
         return instance;
     }
 
-    public ArrayList<CommandDescription_> getCommands() {
+    public ArrayList<CommandDescription> getCommands() {
         return commands;
     }
 }

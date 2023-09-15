@@ -1,11 +1,11 @@
 package requestLogic.requestSenders;
 
-import commandLogic.CommandDescription_;
+import commandLogic.CommandDescription;
 import exceptions.NotAvailableServerException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import requests.ArgumentCommandClientRequest_;
-import responses.CommandStatusResponse_;
+import requests.ArgumentCommandClientRequest;
+import responses.CommandStatusResponse;
 import serverLogic.ServerConnection;
 
 import java.io.IOException;
@@ -16,12 +16,12 @@ public class ArgumentRequestSender<T extends Serializable> {
 
     private static final Logger logger = LogManager.getLogger("io.github.Mekek.lab6");
 
-    public CommandStatusResponse_ sendCommand(CommandDescription_ command, String[] args, T argument, ServerConnection connection) {
-        CommandStatusResponse_ response = null;
+    public CommandStatusResponse sendCommand(String name, char[] passwd, CommandDescription command, String[] args, T argument, ServerConnection connection) {
+        CommandStatusResponse response = null;
         try {
-            ArgumentCommandClientRequest_<T> rq = new ArgumentCommandClientRequest_<>(command, args, argument);
+            ArgumentCommandClientRequest<T> rq = new ArgumentCommandClientRequest<>(name, passwd, command, args, argument);
             logger.info("Sending command request...");
-            response = (CommandStatusResponse_) new RequestSender().sendRequest(rq, connection);
+            response = (CommandStatusResponse) new RequestSender().sendRequest(rq, connection);
         } catch (PortUnreachableException e) {
             logger.warn("Server is unavailable. Please, wait until server will came back.");
         } catch (NotAvailableServerException e) {

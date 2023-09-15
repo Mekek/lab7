@@ -2,7 +2,7 @@ package models.handlers.userMode;
 
 
 import exceptions.BuildObjectException;
-import models.Coordinates_;
+import models.Coordinates;
 import models.handlers.ModeManager;
 import models.validators.CoordinateXValidator;
 import models.validators.CoordinateYValidator;
@@ -16,7 +16,7 @@ import java.util.Scanner;
 /**
  * A class that implements the ModeManager interface for creating Coordinate objects via command-line interface.
  */
-public class CoordinatesCLIManager implements ModeManager<Coordinates_> {
+public class CoordinatesCLIManager implements ModeManager<Coordinates> {
     /**
      * Builds a Coordinates object via command-line interface, prompting the user for input.
      *
@@ -26,10 +26,10 @@ public class CoordinatesCLIManager implements ModeManager<Coordinates_> {
      * @throws BuildObjectException if there is an error building the object.
      */
     @Override
-    public Coordinates_ buildObject() throws BuildObjectException {
+    public Coordinates buildObject() throws BuildObjectException {
         try {
             System.out.println("Generating Coordinates...");
-            Coordinates_ coordinates = new Coordinates_();
+            Coordinates coordinates = new Coordinates();
             Scanner scanner = new Scanner(System.in);
             InputValidator inputValidator = new InputValidator();
             String nextLine;

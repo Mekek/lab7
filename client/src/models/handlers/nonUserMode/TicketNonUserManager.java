@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  * A ModeManager implementation for generating Ticket objects without user input.
  */
 public class TicketNonUserManager implements ModeManager<Ticket> {
-    private static final Logger myLogger = Logger.getLogger("com.github.Mekek.lab5");
+    private static final Logger myLogger = Logger.getLogger("com.github.Mekek.lab6");
 
     Scanner scanner;
 
@@ -63,7 +63,7 @@ public class TicketNonUserManager implements ModeManager<Ticket> {
 
             // coordinates
 //            System.out.println("Generating coordinates...");
-            Coordinates_ coordinates = new Coordinates_();
+            Coordinates coordinates = new Coordinates();
             coordinates.setX(Double.parseDouble(values.get(1)));
             System.out.println("Coords X: " + coordinates.getX());
             coordinates.setY(Float.parseFloat(values.get(2)));

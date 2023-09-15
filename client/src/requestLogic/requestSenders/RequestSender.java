@@ -3,9 +3,9 @@ package requestLogic.requestSenders;
 import exceptions.NotAvailableServerException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import requests.BaseRequest_;
+import requests.BaseRequest;
 import responseLogic.ResponseReader;
-import responses.BaseResponse_;
+import responses.BaseResponse;
 import serverLogic.ServerConnection;
 
 import java.io.ByteArrayOutputStream;
@@ -16,8 +16,8 @@ import java.io.ObjectOutputStream;
 public class RequestSender {
     private static final Logger logger = LogManager.getLogger("io.github.Mekek.lab6");
 
-    public BaseResponse_ sendRequest(BaseRequest_ request, ServerConnection connection) throws IOException, NotAvailableServerException {
-        BaseResponse_ response = null;
+    public BaseResponse sendRequest(BaseRequest request, ServerConnection connection) throws IOException, NotAvailableServerException {
+        BaseResponse response = null;
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(bos);

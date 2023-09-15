@@ -1,13 +1,13 @@
 package commandManager.commands;
 
-import commandManager.CommandManager_;
-import responses.CommandStatusResponse_;
+import commandManager.CommandManager;
+import responses.CommandStatusResponse;
 
 /**
  * Base interface for command implementation. You should implement it before applying command in CommandManager
  *
  * @author Mekek
- * @see CommandManager_
+ * @see CommandManager
  * @since 1.0
  */
 public interface Command {
@@ -48,5 +48,5 @@ public interface Command {
      * @return Full command output
      * @since 2.0
      */
-    CommandStatusResponse_ getResponse();
+    CommandStatusResponse getResponse();
 }

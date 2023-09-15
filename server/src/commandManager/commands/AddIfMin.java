@@ -1,13 +1,14 @@
 package commandManager.commands;
 
+import collectionStorageManager.PostgreSQLManager;
 import models.Ticket;
-import models.comparators.TicketComparator_;
-import models.handlers.CollectionHandler_;
-import models.handlers.TicketIDHandler_;
-import models.handlers.TicketHandler_;
+import models.comparators.TicketComparator;
+import models.handlers.CollectionHandler;
+import models.handlers.TicketIDHandler;
+import models.handlers.TicketHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import responses.CommandStatusResponse_;
+import responses.CommandStatusResponse;
 
 import java.time.Instant;
 import java.util.Date;
@@ -23,7 +24,7 @@ import java.util.stream.Stream;
  */
 public class AddIfMin implements Command, ArgumentConsumer<Ticket> {
     private static final Logger logger = LogManager.getLogger("io.github.Mekek.lab6.commands.addIfMin");
-    private CommandStatusResponse_ response;
+    private CommandStatusResponse response;
     private Ticket obj;
 
     @Override
@@ -44,16 +45,21 @@ public class AddIfMin implements Command, ArgumentConsumer<Ticket> {
     @Override
     public void execute(String[] args) {
 
-//        CollectionHandler_<TreeSet<Ticket>, Ticket> collectionHandler = TicketHandler_.getInstance();
-        CollectionHandler_<Vector<Ticket>, Ticket> collectionHandler = TicketHandler_.getInstance();
+//        CollectionHandler<Vector<Ticket>, Ticket> collectionHandler = TicketHandler.getInstance();
+        CollectionHandler<Vector<Ticket>, Ticket> collectionHandler = TicketHandler.getInstance();
         Stream<Ticket> stream = collectionHandler.getCollection().stream();
 
-        if (obj.getPrice() > stream.sorted(new TicketComparator_()).collect(Collectors.toCollection(Vector :: new)).firstElement().getPrice()) {
-            collectionHandler.addElementToCollection(obj);
-            response = CommandStatusResponse_.ofString("Element added!");
-        } else {
-            response = new CommandStatusResponse_("Element not added: it's not lower than min value.", 3);
-        }
+        if (obj.getPrice() > stream.sorted(new TicketComparator()).collect(Collectors.toCollection(Vector :: new)).firstElement().getPrice()) {
+            PostgreSQLManager manager = new PostgreSQLManager();
+            int generatedId = manager.writeObjectToDatabase(obj);
+
+            if (generatedId != -1) {
+                // Set the generated ID for the new element
+                obj.setId(generatedId);
+                collectionHandler.addElementToCollection(obj);
+                response = CommandStatusResponse.ofString("Element added with ID: " + generatedId);
+            } else response = CommandStatusResponse.ofString("Failed to add element.");
+        } else response = new CommandStatusResponse("Element not added: it's not lower than min value.", 3);
         stream = collectionHandler.getCollection().stream();
         Vector<Ticket> vector = stream.collect(Collectors.toCollection(Vector::new));
         collectionHandler.setCollection(vector);
@@ -62,14 +68,14 @@ public class AddIfMin implements Command, ArgumentConsumer<Ticket> {
     }
 
     @Override
-    public CommandStatusResponse_ getResponse() {
+    public CommandStatusResponse getResponse() {
         return response;
     }
 
     @Override
     public void setObj(Ticket obj) {
         this.obj = obj;
-        obj.setId(TicketIDHandler_.generateId());
+        obj.setId(TicketIDHandler.generateId());
         obj.setCreationDate(Date.from(Instant.now()));
     }
 }

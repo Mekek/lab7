@@ -1,11 +1,11 @@
 package commandManager.commands;
 
 import models.Ticket;
-import models.handlers.TicketHandler_;
-import models.handlers.CollectionHandler_;
+import models.handlers.TicketHandler;
+import models.handlers.CollectionHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import responses.CommandStatusResponse_;
+import responses.CommandStatusResponse;
 
 import java.util.Vector;
 
@@ -17,7 +17,7 @@ import java.util.Vector;
  */
 public class Info implements Command {
     private static final Logger logger = LogManager.getLogger("io.github.Mekek.lab6.commands.info");
-    private CommandStatusResponse_ response;
+    private CommandStatusResponse response;
 
     @Override
     public String getName() {
@@ -31,20 +31,22 @@ public class Info implements Command {
 
     @Override
     public void execute(String[] args) {
-        CollectionHandler_<Vector<Ticket>, Ticket> collectionHandler = TicketHandler_.getInstance();
+        CollectionHandler<Vector<Ticket>, Ticket> collectionHandler = TicketHandler.getInstance();
 
         Vector<Ticket> collection = collectionHandler.getCollection();
 
-        String sb = "Now you are operating with collection of type " + collection.getClass().getName() + ", filled with elements of type " + collectionHandler.getFirstOrNew().getClass().getName() + '\n' +
-                "Collection size: " + collection.size() + '\n' +
-                "Init date: " + collectionHandler.getInitDate();
+        String output = String.format("Now you are operating with collection of type %s, filled with elements of type %s\nCollection size: %d\nInit date: %s",
+                collection.getClass().getName(),
+                collectionHandler.getFirstOrNew().getClass().getName(),
+                collection.size(),
+                collectionHandler.getInitDate());
 
-        response = CommandStatusResponse_.ofString(sb);
+        response = CommandStatusResponse.ofString(output);
         logger.info(response.getResponse());
     }
 
     @Override
-    public CommandStatusResponse_ getResponse() {
+    public CommandStatusResponse getResponse() {
         return response;
     }
 }

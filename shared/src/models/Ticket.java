@@ -16,13 +16,13 @@ public class Ticket implements Comparable<Ticket>, Serializable {
     private static final long serialVersionUID = 1L;
     private Integer id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     private String name; //Поле не может быть null, Строка не может быть пустой
-    private Coordinates_ coordinates; //Поле не может быть null
+    private Coordinates coordinates; //Поле не может быть null
     private Date creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
     private Float price; //Поле не может быть null, Значение поля должно быть больше 0
     private TicketType type; //Поле не может быть null
     private Event event; //Поле не может быть null
 
-    public Ticket(Integer id, String name, Coordinates_ coordinates, Date  creationDate, Float price, TicketType type, Event event) {
+    public Ticket(Integer id, String name, Coordinates coordinates, Date  creationDate, Float price, TicketType type, Event event) {
         this.id = id;
         this.name = name;
         this.coordinates = coordinates;
@@ -50,11 +50,11 @@ public class Ticket implements Comparable<Ticket>, Serializable {
         this.name = name;
     }
 
-    public Coordinates_ getCoordinates() {
+    public Coordinates getCoordinates() {
         return coordinates;
     }
 
-    public void setCoordinates(Coordinates_ coordinates) {
+    public void setCoordinates(Coordinates coordinates) {
         this.coordinates = coordinates;
     }
 

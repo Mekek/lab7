@@ -1,13 +1,19 @@
 package commandManager.commands;
 
+import collectionStorageManager.PostgreSQLManager;
 import models.Ticket;
-import models.handlers.CollectionHandler_;
-import models.handlers.TicketHandler_;
+import models.handlers.CollectionHandler;
+import models.handlers.TicketHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import responses.CommandStatusResponse_;
+import responses.CommandStatusResponse;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Shows every element of the collection in toString() interpretation.
@@ -17,7 +23,7 @@ import java.util.Vector;
  */
 public class Show implements Command {
     private static final Logger logger = LogManager.getLogger("io.github.Mekek.lab6.commands.show");
-    private CommandStatusResponse_ response;
+    private CommandStatusResponse response;
 
     @Override
     public String getName() {
@@ -31,22 +37,49 @@ public class Show implements Command {
 
     @Override
     public void execute(String[] args) {
-        CollectionHandler_<Vector<Ticket>, Ticket> collectionHandler = TicketHandler_.getInstance();
+        PostgreSQLManager manager = new PostgreSQLManager();
 
-        StringBuilder sb = new StringBuilder();
+        logger.debug("Received args: " + Arrays.toString(args));
+        int itemsPerPage = 10; // You can change this value to your desired number of items per page
+        int pageNumber = 0;
 
-        collectionHandler.getCollection().forEach(e -> sb.append(e.toString()).append('\n'));
-        response = CommandStatusResponse_.ofString(sb.toString());
+        CollectionHandler<Vector<Ticket>, Ticket> collectionHandler = TicketHandler.getInstance();
 
-        if (collectionHandler.getCollection().isEmpty()) {
-            response = CommandStatusResponse_.ofString("There's nothing to show.");
+        List<Ticket> ticketList = new ArrayList<>(manager.getCollectionFromDatabase());
+        collectionHandler.addMissingTicketsToCollection(ticketList);
+        int totalPages = (int) Math.ceil((double) ticketList.size() / itemsPerPage);
+
+        String output;
+        if (args != null && args.length > 1) {
+            try {
+                pageNumber = Integer.parseInt(args[1]) - 1;
+            } catch (NumberFormatException e) {
+                response = CommandStatusResponse.ofString("Invalid page number.");
+                logger.warn(response.getResponse());
+                return;
+            }
+
+            if (pageNumber < 0 || pageNumber >= totalPages) {
+                response = CommandStatusResponse.ofString("Page number out of range.");
+                logger.warn(response.getResponse());
+                return;
+            }
+
+            output = IntStream.range(itemsPerPage * pageNumber, Math.min(itemsPerPage * (pageNumber + 1), ticketList.size()))
+                    .mapToObj(i -> ticketList.get(i).toString())
+                    .collect(Collectors.joining("\n"));
+
+            response = CommandStatusResponse.ofString("Page " + (pageNumber + 1) + " of " + totalPages + ":\n" + output);
+            logger.info(response.getResponse());
+
+        } else {
+            output = "Total pages: " + totalPages;
+            response = CommandStatusResponse.ofString(output);
         }
-
-        logger.info(response.getResponse());
     }
 
     @Override
-    public CommandStatusResponse_ getResponse() {
+    public CommandStatusResponse getResponse() {
         return response;
     }
 }

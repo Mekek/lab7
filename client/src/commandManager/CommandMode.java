@@ -4,7 +4,7 @@ package commandManager;
  * Contains information about mode of commands behavior
  *
  * @since 1.1
- * @author zerumi
+ * @author Mekek
  */
 public enum CommandMode {
     /**

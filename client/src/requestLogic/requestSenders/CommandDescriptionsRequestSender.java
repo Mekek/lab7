@@ -1,11 +1,11 @@
 package requestLogic.requestSenders;
 
-import commandLogic.CommandDescription_;
+import commandLogic.CommandDescription;
 import exceptions.NotAvailableServerException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import requests.CommandDescriptionsRequest_;
-import responses.CommandDescriptionsResponse_;
+import requests.CommandDescriptionsRequest;
+import responses.CommandDescriptionsResponse;
 import serverLogic.ServerConnectionHandler;
 
 import java.io.IOException;
@@ -16,13 +16,13 @@ public class CommandDescriptionsRequestSender {
 
     private static final Logger logger = LogManager.getLogger("io.github.Mekek.lab6");
 
-    public ArrayList<CommandDescription_> sendRequestAndGetCommands() {
-        ArrayList<CommandDescription_> result = null;
+    public ArrayList<CommandDescription> sendRequestAndGetCommands() {
+        ArrayList<CommandDescription> result = null;
 
-        CommandDescriptionsRequest_ request = new CommandDescriptionsRequest_();
+        CommandDescriptionsRequest request = new CommandDescriptionsRequest();
 
         try {
-            CommandDescriptionsResponse_ response = (CommandDescriptionsResponse_) new RequestSender().sendRequest(request, ServerConnectionHandler.getCurrentConnection());
+            CommandDescriptionsResponse response = (CommandDescriptionsResponse) new RequestSender().sendRequest(request, ServerConnectionHandler.getCurrentConnection());
             result = response.getCommands();
         } catch (PortUnreachableException e) {
             logger.fatal("Server is unavailable. Please, wait until server will came back.");

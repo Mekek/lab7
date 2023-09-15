@@ -1,9 +1,9 @@
 package commandManager.commands;
 
-import clientLogic.ClientHandler_;
+import models.handlers.TicketHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import responses.CommandStatusResponse_;
+import responses.CommandStatusResponse;
 
 /**
  * Terminates the application (without saving collection).
@@ -13,7 +13,7 @@ import responses.CommandStatusResponse_;
  */
 public class Exit implements Command {
     private static final Logger logger = LogManager.getLogger("io.github.Mekek.lab6.commands.exit");
-    private CommandStatusResponse_ response;
+    private CommandStatusResponse response;
 
     @Override
     public String getName() {
@@ -29,15 +29,13 @@ public class Exit implements Command {
     public void execute(String[] args) {
         logger.trace("Invoked exit command. Saving a collection...");
         logger.info("Someone is disconnected... Saving a collection...");
-        ClientHandler_.getInstance().allowNewCallerBack();
-        logger.info("Allowed new caller back.");
         Save saveCommand = new Save();
         saveCommand.execute(new String[0]);
-        response = CommandStatusResponse_.ofString("Prepared for exit!");
+        response = CommandStatusResponse.ofString("Exiting the program!");
     }
 
     @Override
-    public CommandStatusResponse_ getResponse() {
+    public CommandStatusResponse getResponse() {
         return response;
     }
 }

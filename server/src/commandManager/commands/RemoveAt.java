@@ -1,11 +1,12 @@
 package commandManager.commands;
 
+import collectionStorageManager.PostgreSQLManager;
 import models.Ticket;
-import models.handlers.TicketHandler_;
-import models.handlers.CollectionHandler_;
+import models.handlers.CollectionHandler;
+import models.handlers.TicketHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import responses.CommandStatusResponse_;
+import responses.CommandStatusResponse;
 
 import java.util.Vector;
 
@@ -17,7 +18,7 @@ import java.util.Vector;
  */
 public class RemoveAt implements Command {
     private static final Logger logger = LogManager.getLogger("io.github.Mekek.lab6.commands.removeAt");
-    private CommandStatusResponse_ response;
+    private CommandStatusResponse response;
 
     @Override
     public String getName() {
@@ -36,27 +37,34 @@ public class RemoveAt implements Command {
 
     @Override
     public void execute(String[] args) {
-        CollectionHandler_<Vector<Ticket>, Ticket> collectionHandler = TicketHandler_.getInstance();
+        CollectionHandler<Vector<Ticket>, Ticket> collectionHandler = TicketHandler.getInstance();
 
         int index = 0;
-        for (Ticket ticket : collectionHandler.getCollection()) {
-            if (index  == Float.valueOf(args[1])) {
-                collectionHandler.getCollection().remove(ticket);
-                index = -1;
-                break;
+
+        PostgreSQLManager dbManager = new PostgreSQLManager();
+        int count = 0;
+
+        Integer rightId = null;
+
+        for (Ticket current : collectionHandler.getCollection()) {
+            if (dbManager.isTicketOwnedByUser(current.getId()) && index == Integer.parseInt(args[1])) {
+                if (dbManager.removeTicketById(current.getId())) {
+                    count++;
+                    rightId = current.getId();
+                }
             }
             index ++;
         }
-        if (index == -1) {
-            response = CommandStatusResponse_.ofString("Executed.");
-        }
-        else response = CommandStatusResponse_.ofString("Element with that index doesn't exists.");
+
+        Integer finalRightId = rightId;
+        collectionHandler.getCollection().removeIf(current -> dbManager.isTicketOwnedByUser(current.getId()) && finalRightId < current.getId());
+        response = CommandStatusResponse.ofString("Removed " + count + " element(s)");
 
         logger.info(response.getResponse());
     }
 
     @Override
-    public CommandStatusResponse_ getResponse() {
+    public CommandStatusResponse getResponse() {
         return response;
     }
 }

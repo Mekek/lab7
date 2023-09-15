@@ -1,6 +1,6 @@
 package models.validators;
 
-import models.Coordinates_;
+import models.Coordinates;
 import models.Ticket;
 
 import java.util.Optional;
@@ -15,8 +15,8 @@ public class TicketValidator implements Validator<Ticket>{
     @Override
     public boolean validate(Ticket ticket) {
         return new NameValidator().validate(ticket.getName())
-                && new CoordinateXValidator().validate(Optional.of(ticket).map(Ticket::getCoordinates).map(Coordinates_::getX).orElse(null))
-                && new CoordinateYValidator().validate(Optional.of(ticket).map(Ticket::getCoordinates).map(Coordinates_::getY).orElse(null))
+                && new CoordinateXValidator().validate(Optional.of(ticket).map(Ticket::getCoordinates).map(Coordinates::getX).orElse(null))
+                && new CoordinateYValidator().validate(Optional.of(ticket).map(Ticket::getCoordinates).map(Coordinates::getY).orElse(null))
                 && new PriceValidator().validate(ticket.getPrice());
 
     }

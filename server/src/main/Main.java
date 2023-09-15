@@ -1,40 +1,37 @@
 package main;
 
-import clientLogic.ClientHandler_;
-import commandManager.ServerCommandManager_;
+import commandManager.ServerCommandManager;
 import commandManager.commands.Save;
+
 import models.Ticket;
-import models.handlers.CollectionHandler_;
-import models.handlers.TicketHandler_;
+import models.handlers.CollectionHandler;
+import models.handlers.TicketHandler;
+import multithreading.MultithreadingManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import models.requestLogic.RequestReader_;
-import models.requestLogic.StatusRequest_;
-import models.requestLogic.requestWorkers.RequestWorkerManager_;
-import models.requestLogic.requests.ServerRequest_;
-import requests.BaseRequest_;
+import requestLogic.RequestReader;
+import requestLogic.StatusRequest;
+import requestLogic.requestWorkers.RequestWorkerManager;
+import requestLogic.requests.ServerRequest;
+import requests.BaseRequest;
 
 import java.io.*;
 import java.net.SocketTimeoutException;
 
-import responses.CommandStatusResponse_;
-import serverLogic.DatagramServerConnectionFactory_;
-import serverLogic.ServerConnection_;
+import serverLogic.DatagramServerConnectionFactory;
+import serverLogic.ServerConnection;
 
 import javax.swing.*;
 import java.io.IOException;
 import java.util.Scanner;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @SuppressWarnings("InfiniteLoopStatement")
 public class Main {
     public static final int PORT = 50457;
     private static final Logger logger = LogManager.getLogger("io.github.Mekek.lab6");
-    private static final Scanner scanner;
-
-    static {
-        scanner = new Scanner(System.in);
-    }
 
     /**
      * Environment key to CSV file for store collection.
@@ -42,10 +39,9 @@ public class Main {
     public static final String ENV_KEY = "lab6";
 
     public static void main(String[] args) {
-        Runtime.getRuntime().addShutdownHook(new Thread(Main::finish));
-        CollectionHandler_<Vector<Ticket>, Ticket> handler = TicketHandler_.getInstance();
-        TicketHandler_ loader = TicketHandler_.getInstance();
-//        HistoryCommand.initializeCommandsHistoryQueue();
+//        Class.forName("org.postgresql.Driver");
+        CollectionHandler<Vector<Ticket>, Ticket> handler = TicketHandler.getInstance();
+        TicketHandler loader = TicketHandler.getInstance();
 
         logger.trace("This is a server!");
 
@@ -55,36 +51,45 @@ public class Main {
 
         // load collection
         try {
-            loader.loadCollection(ENV_KEY);
-            logger.info("Loaded elements: " + handler.getCollection().size());
+            // loader.loadCollectionFromFile(ENV_KEY);
+            loader.loadCollectionFromDatabase();
+            logger.info("Loaded " + handler.getCollection().size() + " elements total.");
             logger.info(" ");
 
             // commands
-            logger.info("You are operating with collection of \n  type: " + handler.getCollection().getClass().getName() + ", \n  filled with elements of type: " + handler.getFirstOrNew().getClass().getName());
-            logger.info("Server is listening a requests.");
+            logger.info("Welcome to CLI! Now you are operating with collection of \n  type: " + handler.getCollection().getClass().getName() + ", \n  filled with elements of type: " + handler.getFirstOrNew().getClass().getName());
+            logger.info("Now server is listening a requests.");
         } catch (IllegalArgumentException e) {
-            logger.info("Something went wrong! Collection can't be loaded from file due to some troubles: \n");
+            logger.info("Collection can't be loaded from file due to some troubles: \n");
             logger.info(e.getMessage());
-            finish();
         }
 
+        // Create thread pools for processing requests and sending responses
+        ExecutorService requestProcessingThreadPool = MultithreadingManager.getRequestThreadPool();
+
         // connection
-        logger.info("Connection...");
-        ServerConnection_ connection = new DatagramServerConnectionFactory_().initializeServer(PORT);
-//        Runtime.getRuntime().addShutdownHook(new Thread(Main::finish));
+        logger.info("Creating a connection...");
+        ServerConnection connection = new DatagramServerConnectionFactory().initializeServer(PORT);
         while (true) {
             try {
-                StatusRequest_ rq = connection.listenAndGetData();
+                StatusRequest rq = connection.listenAndGetData();
                 if (rq.getCode() < 0) {
                     logger.debug("Status code: " + rq.getCode());
                     continue;
                 }
+                new Thread(() -> {
+                    try {
 
-                RequestReader_ rqReader = new RequestReader_(rq.getInputStream());
-                BaseRequest_ baseRequest = rqReader.readObject();
-                var request = new ServerRequest_(baseRequest, rq.getCallerBack(), connection);
-                RequestWorkerManager_ worker = new RequestWorkerManager_();
-                worker.workWithRequest(request);
+                        RequestReader rqReader = new RequestReader(rq.getInputStream());
+                        BaseRequest baseRequest = rqReader.readObject();
+                        var request = new ServerRequest(baseRequest, rq.getCallerBack(), connection);
+                        RequestWorkerManager worker = new RequestWorkerManager();
+                        // Process requests using the fixed thread pool
+                        requestProcessingThreadPool.submit(() -> worker.workWithRequest(request));
+                    } catch (IOException | ClassNotFoundException e) {
+                        logger.error("Error in request processing thread", e);
+                    }
+                }).start();
             } catch (SocketTimeoutException e) {
                 // Check if there's any input available in System.in
                 try {
@@ -92,7 +97,7 @@ public class Main {
                         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
                         String line = reader.readLine();
                         if (line != null) {
-                            ServerCommandManager_ manager = new ServerCommandManager_();
+                            ServerCommandManager manager = new ServerCommandManager();
                             manager.executeCommand(line.split(" "));
                         }
                     }
@@ -101,23 +106,9 @@ public class Main {
                 }
             } catch (IOException e) {
                 logger.error("Something went wrong during I/O", e);
-            } catch (ClassNotFoundException e) {
-                logger.error("Class not found", e);
             } catch (RuntimeException e) {
                 logger.fatal(e);
             }
         }
-    }
-
-    public static void finish() {
-        System.out.println("finish");
-        CommandStatusResponse_ response;
-        logger.trace("Invoked exit command. Saving a collection...");
-        logger.info("Someone is disconnected... Saving a collection...");
-        ClientHandler_.getInstance().allowNewCallerBack();
-        logger.info("Allowed new caller back.");
-        Save saveCommand = new Save();
-        saveCommand.execute(new String[0]);
-        response = CommandStatusResponse_.ofString("Prepared for exit!");
     }
 }

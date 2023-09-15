@@ -1,11 +1,11 @@
 package commandManager.externalRecievers;
 
-import commandLogic.CommandDescription_;
+import commandLogic.CommandDescription;
 import commandLogic.commandReceiverLogic.receivers.ExternalBaseReceiver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import requestLogic.requestSenders.CommandRequestSender;
-import responses.CommandStatusResponse_;
+import responses.CommandStatusResponse;
 import serverLogic.ServerConnectionHandler;
 
 public class NonArgumentReceiver implements ExternalBaseReceiver {
@@ -13,8 +13,8 @@ public class NonArgumentReceiver implements ExternalBaseReceiver {
     private static final Logger logger = LogManager.getLogger("com.github.Mekek.lab6");
 
     @Override
-    public boolean receiveCommand(CommandDescription_ command, String[] args) {
-        CommandStatusResponse_ response = new CommandRequestSender().sendCommand(command, args, ServerConnectionHandler.getCurrentConnection());
+    public boolean receiveCommand(String name, char[] passwd, CommandDescription command, String[] args) {
+        CommandStatusResponse response = new CommandRequestSender().sendCommand(name, passwd, command, args, ServerConnectionHandler.getCurrentConnection());
         if (response != null) {
             logger.info("Status code: " + response.getStatusCode());
             logger.info("Response: \n" + response.getResponse());

@@ -1,8 +1,8 @@
 package responseLogic;
 
 import exceptions.NotAvailableServerException;
-import responses.BaseResponse_;
-import responses.ErrorResponse_;
+import responses.BaseResponse;
+import responses.ErrorResponse;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -16,15 +16,15 @@ public class ResponseReader {
         this.in = in;
     }
 
-    public BaseResponse_ readObject() throws IOException, ClassNotFoundException, NotAvailableServerException {
+    public BaseResponse readObject() throws IOException, ClassNotFoundException, NotAvailableServerException {
         try {
             ObjectInputStream ois = new ObjectInputStream(in);
-            BaseResponse_ result = (BaseResponse_) ois.readObject();
-            if (result instanceof ErrorResponse_)
-                throw new NotAvailableServerException(((ErrorResponse_) result).getMsg());
+            BaseResponse result = (BaseResponse) ois.readObject();
+            if (result instanceof ErrorResponse)
+                throw new NotAvailableServerException(((ErrorResponse) result).getMsg());
             return result;
         } catch (EOFException e) {
-            return new ErrorResponse_("Ответ от сервера не уместился в буфер. Возможно, коллекция получилась слишком большая =(");
+            return new ErrorResponse("Ответ от сервера не уместился в буфер. Возможно, коллекция получилась слишком большая =(");
         }
     }
 }

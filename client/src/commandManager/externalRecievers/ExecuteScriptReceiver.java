@@ -1,6 +1,6 @@
 package commandManager.externalRecievers;
 
-import commandLogic.CommandDescription_;
+import commandLogic.CommandDescription;
 import commandLogic.commandReceiverLogic.receivers.ExternalBaseReceiver;
 import commandManager.CommandDescriptionHolder;
 import commandManager.CommandExecutor;
@@ -32,7 +32,7 @@ public class ExecuteScriptReceiver implements ExternalBaseReceiver {
     private static final Logger myLogger = Logger.getLogger("com.github.Mekek.lab6");
 
     @Override
-    public boolean receiveCommand(CommandDescription_ commandDescription, String[] args) throws IllegalArgumentException, WrongArgumentsAmountException {
+    public boolean receiveCommand(String name, char[] passwd, CommandDescription commandDescription, String[] args) throws IllegalArgumentException, WrongArgumentsAmountException {
 
         if (!Objects.equals(commandDescription.getName(), "execute_script")) return true;
 

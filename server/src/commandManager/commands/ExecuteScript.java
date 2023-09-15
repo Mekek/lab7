@@ -1,9 +1,9 @@
 package commandManager.commands;
 
-import responses.CommandStatusResponse_;
+import responses.CommandStatusResponse;
 
 public class ExecuteScript implements Command {
-    private CommandStatusResponse_ response;
+    private CommandStatusResponse response;
     @Override
     public String getName() {
         return "execute_script";
@@ -21,11 +21,11 @@ public class ExecuteScript implements Command {
 
     @Override
     public void execute(String[] args) throws IllegalArgumentException {
-        response = CommandStatusResponse_.ofString("Server is alive and ready for command executing!");
+        response = CommandStatusResponse.ofString("Server is alive and ready for command executing!");
     }
 
     @Override
-    public CommandStatusResponse_ getResponse() {
+    public CommandStatusResponse getResponse() {
         return response;
     }
 }

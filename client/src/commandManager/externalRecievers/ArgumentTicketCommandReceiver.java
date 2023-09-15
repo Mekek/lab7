@@ -1,6 +1,6 @@
 package commandManager.externalRecievers;
 
-import commandLogic.CommandDescription_;
+import commandLogic.CommandDescription;
 import commandLogic.commandReceiverLogic.receivers.ExternalArgumentReceiver;
 import exceptions.BuildObjectException;
 import models.Ticket;
@@ -8,7 +8,7 @@ import models.handlers.ModeManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import requestLogic.requestSenders.ArgumentRequestSender;
-import responses.CommandStatusResponse_;
+import responses.CommandStatusResponse;
 import serverLogic.ServerConnectionHandler;
 
 public class ArgumentTicketCommandReceiver implements ExternalArgumentReceiver<Ticket> {
@@ -26,9 +26,9 @@ public class ArgumentTicketCommandReceiver implements ExternalArgumentReceiver<T
     }
 
     @Override
-    public boolean receiveCommand(CommandDescription_ command, String[] args) throws BuildObjectException {
+    public boolean receiveCommand(String name, char[] passwd, CommandDescription command, String[] args) throws BuildObjectException {
         ticket = modeManager.buildObject();
-        CommandStatusResponse_ response = new ArgumentRequestSender<Ticket>().sendCommand(command, args, ticket, ServerConnectionHandler.getCurrentConnection());
+        CommandStatusResponse response = new ArgumentRequestSender<Ticket>().sendCommand(name, passwd, command, args, ticket, ServerConnectionHandler.getCurrentConnection());
         if (response != null) {
             logger.info("Status code: " + response.getStatusCode());
             logger.info("Response: \n" + response.getResponse());

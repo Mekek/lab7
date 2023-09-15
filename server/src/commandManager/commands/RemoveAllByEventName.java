@@ -1,16 +1,15 @@
 package commandManager.commands;
 
+import collectionStorageManager.PostgreSQLManager;
 import models.Ticket;
-import models.handlers.TicketHandler_;
-import models.handlers.CollectionHandler_;
+import models.handlers.CollectionHandler;
+import models.handlers.TicketHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import responses.CommandStatusResponse_;
+import responses.CommandStatusResponse;
 
 import java.util.Objects;
 import java.util.Vector;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Removes all elements from the collection that have the same event.
@@ -20,7 +19,7 @@ import java.util.stream.Stream;
  */
 public class RemoveAllByEventName implements Command {
     private static final Logger logger = LogManager.getLogger("io.github.Mekek.lab6.commands.removeAllByEvent");
-    private CommandStatusResponse_ response;
+    private CommandStatusResponse response;
 
     @Override
     public String getName() {
@@ -39,24 +38,28 @@ public class RemoveAllByEventName implements Command {
 
     @Override
     public void execute(String[] args) {
-        CollectionHandler_<Vector<Ticket>, Ticket> collectionHandler = TicketHandler_.getInstance();
-        Stream<Ticket> stream = collectionHandler.getCollection().stream();
-        long countBefore = stream.count();
-        stream = stream.filter(ticket -> Objects.equals(ticket.getEvent().getName(), String.valueOf(args[1])));
-        long countAfter = stream.count();
-        Vector<Ticket> vector = stream.collect(Collectors.toCollection(Vector::new));
-        collectionHandler.setCollection(vector);
+        CollectionHandler<Vector<Ticket>, Ticket> collectionHandler = TicketHandler.getInstance();
+        String eventName = args[1];
 
-        if (countBefore != countAfter)
-            response = CommandStatusResponse_.ofString("Executed.");
-        else
-            response = CommandStatusResponse_.ofString("Element with that event name doesn't exists.");
+        PostgreSQLManager dbManager = new PostgreSQLManager();
+        int count = 0;
+
+        for (Ticket current : collectionHandler.getCollection()) {
+            if (dbManager.isTicketOwnedByUser(current.getId()) && Objects.equals(eventName, current.getEvent().getName())) {
+                if (dbManager.removeTicketById(current.getId())) {
+                    count++;
+                }
+            }
+        }
+
+        collectionHandler.getCollection().removeIf(current -> dbManager.isTicketOwnedByUser(current.getId()) && Objects.equals(eventName, current.getEvent().getName()));
+        response = CommandStatusResponse.ofString("Removed " + count + " elements");
 
         logger.info(response.getResponse());
     }
 
     @Override
-    public CommandStatusResponse_ getResponse() {
+    public CommandStatusResponse getResponse() {
         return response;
     }
 }

@@ -1,12 +1,12 @@
 package commandManager.commands;
 
 import models.Ticket;
-import models.comparators.TicketComparatorByEvent_;
-import models.handlers.CollectionHandler_;
-import models.handlers.TicketHandler_;
+import models.comparators.TicketComparatorByEvent;
+import models.handlers.CollectionHandler;
+import models.handlers.TicketHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import responses.CommandStatusResponse_;
+import responses.CommandStatusResponse;
 
 import java.util.Vector;
 import java.util.stream.Stream;
@@ -19,7 +19,7 @@ import java.util.stream.Stream;
  */
 public class PrintFieldAscendingEvent implements Command {
     private static final Logger logger = LogManager.getLogger("io.github.Mekek.lab6.commands.printFieldAscendingEvent");
-    private CommandStatusResponse_ response;
+    private CommandStatusResponse response;
 
     @Override
     public String getName() {
@@ -33,37 +33,25 @@ public class PrintFieldAscendingEvent implements Command {
 
     @Override
     public void execute(String[] args) {
-//        CollectionHandler_<TreeSet<Ticket>, Ticket> collectionHandler = TicketHandler_.getInstance();
-//
-//        TreeSet<Ticket> sortedTickets = new TreeSet<>(new TicketComparatorByEvent_().reversed());
-
-        CollectionHandler_<Vector<Ticket>, Ticket> collectionHandler = TicketHandler_.getInstance();
+        CollectionHandler<Vector<Ticket>, Ticket> collectionHandler = TicketHandler.getInstance();
 
         Stream<Ticket> stream = collectionHandler.getCollection().stream();
-        stream = stream.sorted(new TicketComparatorByEvent_());
+        stream = stream.sorted(new TicketComparatorByEvent());
         StringBuilder sb = new StringBuilder();
         stream.forEach(ticket -> sb.append(ticket.getEvent().getName()).append('\n'));
 
-//        Vector<Ticket> sortedTickets = new Vector<>();
-//        sortedTickets.sort(new TicketComparatorByEvent_());
-//
-//        sortedTickets.addAll(collectionHandler.getCollection());
-//
-//        StringBuilder sb = new StringBuilder();
-//        for (Ticket ticket : sortedTickets) {
-//            sb.append(ticket.getEvent().getName()).append('\n');
-//        }
-        response = CommandStatusResponse_.ofString(sb.toString());
+
+        response = CommandStatusResponse.ofString(sb.toString());
 
         if (collectionHandler.getCollection().isEmpty())
-            response = CommandStatusResponse_.ofString("There's nothing to show...");
+            response = CommandStatusResponse.ofString("There's nothing to show...");
 
         logger.info(response.getResponse());
     }
 
 
     @Override
-    public CommandStatusResponse_ getResponse() {
+    public CommandStatusResponse getResponse() {
         return response;
     }
 }

@@ -1,9 +1,9 @@
 package commandManager.commands;
 
-import models.handlers.TicketHandler_;
+import models.handlers.TicketHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import responses.CommandStatusResponse_;
+import responses.CommandStatusResponse;
 
 
 /**
@@ -14,7 +14,7 @@ import responses.CommandStatusResponse_;
  */
 public class Save implements Command {
     private static final Logger logger = LogManager.getLogger("io.github.Mekek.lab6.commands.save");
-    private CommandStatusResponse_ response;
+    private CommandStatusResponse response;
 
     @Override
     public String getName() {
@@ -29,16 +29,20 @@ public class Save implements Command {
     @Override
     public void execute(String[] args) {
         logger.trace("Saving...");
-        TicketHandler_ writer = TicketHandler_.getInstance();
-        response = CommandStatusResponse_.ofString("[Server] Collection saving executing...\nsize of collection to write: " + writer.getCollection().size());
+        TicketHandler writer = TicketHandler.getInstance();
+        int collectionSize = writer.getCollection().size();
+
+        response = CommandStatusResponse.ofString("[Server] Collection saving executing...\nsize of collection to write: " + collectionSize);
         logger.info(response.getResponse());
-        writer.writeCollection();
-        response = CommandStatusResponse_.ofString("[Server] Collection saving executed.\nsize of written collection: " + writer.getCollection().size());
+
+        writer.writeCollectionToDatabase();
+
+        response = CommandStatusResponse.ofString("[Server] Collection saving executed.\nsize of written collection: " + collectionSize);
         logger.info(response.getResponse());
     }
 
     @Override
-    public CommandStatusResponse_ getResponse() {
+    public CommandStatusResponse getResponse() {
         return response;
     }
 }
